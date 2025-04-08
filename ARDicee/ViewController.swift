@@ -19,12 +19,43 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Set the view's delegate
         sceneView.delegate = self
-               
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
         
-        // Set the scene to the view
-        sceneView.scene = scene
+        /// Create a new scene that is in fact, a simple cube
+        //let cube = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.01)
+        
+        let sphere = SCNSphere(radius: 0.2)
+        
+        /// Material is the surface of the object.
+        let material = SCNMaterial()
+        //material.diffuse.contents = UIColor.red
+        material.diffuse.contents = UIImage(named: "art.scnassets/moon.jpg")
+        
+        
+        /// Attach the material to the cube.
+        //cube.materials = [material]
+        sphere.materials = [material]
+        
+        /// Node is a position in 3D space.
+        //let node = SCNNode(geometry: cube)
+        let node = SCNNode()
+        
+        /// Postion of the object in 3D space. This is centered, low and further back a little.
+        node.position = SCNVector3(0, 0.1, -0.5)
+        /// With a node in space we now assign the position to the cube.
+        //node.geometry = cube
+        node.geometry = sphere
+        
+        /// put the node into the scene
+        sceneView.scene.rootNode.addChildNode(node)
+        
+        /// Add some depth as shadow to the object
+        sceneView.autoenablesDefaultLighting = true
+               
+//        // Create a new scene
+//        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+//        
+//        // Set the scene to the view
+//        sceneView.scene = scene
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -35,7 +66,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         //print("ARWorldTracking is supported: \(ARWorldTrackingConfiguration.isSupported)")
         
-
         // Run the view's session
         sceneView.session.run(configuration)
     }
