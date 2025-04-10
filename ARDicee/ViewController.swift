@@ -10,12 +10,16 @@ import SceneKit
 import ARKit
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-
+    
     /// The IBOutlet connects the storyboard with the AR code content.
     @IBOutlet var sceneView: ARSCNView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        /// Show the debgug options such as feature points and world origin the SceneKit uses for
+        /// locating a plane in the real world.
+        self.sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints /*, ARSCNDebugOptions.showWorldOrigin*/]
         
         // Set the view's delegate
         sceneView.delegate = self
@@ -49,16 +53,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         /// Add some depth as shadow to the object
         sceneView.autoenablesDefaultLighting = true
-               
+        
         // Create a new scene
-        let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
-        if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
-            diceNode.position = SCNVector3(0, 0, -0.1)
-            
-            // Set the scene to the view
-            sceneView.scene.rootNode.addChildNode(diceNode)
-            //sceneView.scene = scene
-        }
+        //        let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+        //        if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
+        //            diceNode.position = SCNVector3(0, 0, -0.1)
+        //
+        //            // Set the scene to the view
+        //            sceneView.scene.rootNode.addChildNode(diceNode)
+        //            //sceneView.scene = scene
+        //        }
+        
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -67,6 +73,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
         
+        /// Enable plane detection. Ommitting vertical as the tutorial does not cover it. (didn't exist)
+        //configuration.planeDetection = [.horizontal, .vertical]
+        configuration.planeDetection = .horizontal
         //print("ARWorldTracking is supported: \(ARWorldTrackingConfiguration.isSupported)")
         
         // Run the view's session
@@ -79,6 +88,29 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Pause the view's session
         sceneView.session.pause()
     }
-
     
+    /// This will search for the Horizontal plane that can be used as an  Anchor of the object to the plane
+    /// IRL of the scene.
+    func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        if anchor is ARPlaneAnchor {
+            /// When a plane is detected, cast it as an ARPlanAnchor to use it as a reference.
+            let planeAnchor = anchor as! ARPlaneAnchor
+            
+            let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x),
+                                 height: CGFloat(planeAnchor.extent.z))
+            
+            let planeNode = SCNNode()
+            /// This planeNode creates a 2D plane in the vertical orientation with no Z axis.
+            planeNode.position = SCNVector3(planeAnchor.center.x, 0, planeAnchor.center.z)
+            
+            /// We need the planeNode horizontal so we need to transform it and rotate it 90°. The
+            /// method needs radians. 180° = 1π radians. 90° = π/2 radians and is measured from CCW.
+            planeNode.transform = SCNMatrix4MakeRotation(Float(-Double.pi / 2), 1, 0, 0)
+            
+            
+            
+        } else {
+            return
+        }
+    }
 }
