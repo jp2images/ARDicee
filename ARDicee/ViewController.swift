@@ -89,6 +89,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
     
+    /// This method will convert touches on the screen to real world coordinates via SceneKit and AR
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        /// Multitouch is not enabled (we don't want it) so we can assume there is only one touch and we
+        /// will capture it.
+        if let touch = touches.first {
+            let touchLocation = touch.location(in: sceneView)
+            /// This will convert the touch location on the screen into a 3D point in the real world.
+            /// The hitTest will return an array of SCNHitTestResult objects.
+            ///
+            /// The .existingPlaneUsingExtent that is already in the scene becasue we put it on in the
+            /// delegate method func renderer(...
+            let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
+            if !results.isEmpty {
+                print("Touch location: \(touchLocation)")
+            } else {
+                print("Touched someplace else")
+            }
+        }
+    }
+    
     /// This will search for the Horizontal plane that can be used as an  Anchor of the object to the plane
     /// IRL of the scene.
     func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
