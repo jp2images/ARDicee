@@ -115,6 +115,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     
                     // Set the scene to the view
                     sceneView.scene.rootNode.addChildNode(diceNode)
+                    
+                    /// Create a random result between 1 and 4 that represents the die face in the x
+                    let randomX = Float(arc4random_uniform(4) + 1) * (Float.pi/2)
+                    let randomZ = Float(arc4random_uniform(4) + 1) * (Float.pi/2)
+                    /// Using the Y axis won't change the number.
+                    /// TODO Make the die position look more random if the face could change
+                    
+                    diceNode.runAction(SCNAction.rotateBy(
+                        x: 0,
+                        y: CGFloat(randomX * 3),
+                        z: CGFloat(randomZ * 3),
+                        duration: 0.5))
+                    
+
+                            
+                                   
                 }
             }
         }
