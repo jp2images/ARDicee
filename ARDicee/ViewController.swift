@@ -95,16 +95,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         /// will capture it.
         if let touch = touches.first {
             let touchLocation = touch.location(in: sceneView)
+            
             /// This will convert the touch location on the screen into a 3D point in the real world.
             /// The hitTest will return an array of SCNHitTestResult objects.
-            ///
             /// The .existingPlaneUsingExtent that is already in the scene becasue we put it on in the
             /// delegate method func renderer(...
             let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
-            if !results.isEmpty {
-                print("Touch location: \(touchLocation)")
-            } else {
-                print("Touched someplace else")
+            
+            if let hitResult = results.first {
+                //print("hitResult: \(hitResult)")
+                
+                /// Create a new scene
+                let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+                if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
+                    diceNode.position = SCNVector3(
+                        x: hitResult.worldTransform.columns.3.x,
+                        y: hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius,
+                        z: hitResult.worldTransform.columns.3.z)
+                    
+                    // Set the scene to the view
+                    sceneView.scene.rootNode.addChildNode(diceNode)
+                }
             }
         }
     }
