@@ -149,6 +149,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             duration: 0.5))
     }
     
+
     
     @IBAction func rollAgain(_ sender: UIBarButtonItem) {
         rollAll()
@@ -156,6 +157,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
         rollAll()
+    }
+    
+    @IBAction func removeAllDice(_ sender: UIBarButtonItem) {
+        if !diceArray.isEmpty {
+            for dice in diceArray {
+                dice.removeFromParentNode()
+            }
+        }
     }
 
     /// This will search for the Horizontal plane that can be used as an  Anchor of the object to the plane
