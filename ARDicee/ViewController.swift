@@ -186,9 +186,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             /// from the position. We want to go CW so we need to negate the value.
             planeNode.transform = SCNMatrix4MakeRotation((-Float.pi/2), 1, 0, 0)
             
-            let gridMaterial = SCNMaterial()
-            gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
-            plane.materials = [gridMaterial]
+            //let gridMaterial = SCNMaterial()
+            let transparentMaterial = SCNMaterial()
+            //gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
+            transparentMaterial.diffuse.contents = UIColor.clear
+            //plane.materials = [gridMaterial]
+            plane.materials = [transparentMaterial]
             planeNode.geometry = plane
             //sceneView.scene.rootNode.addChildNode(planeNode)
             node.addChildNode(planeNode)
