@@ -14,14 +14,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     /// The IBOutlet connects the storyboard with the AR code content.
     @IBOutlet var sceneView: ARSCNView!
     
-    var diceArray = [SCNNode]()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         /// Show the debgug options such as feature points and world origin the SceneKit uses for
         /// locating a plane in the real world.
-        //self.sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints /*, ARSCNDebugOptions.showWorldOrigin*/]
+        self.sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints /*, ARSCNDebugOptions.showWorldOrigin*/]
         
         // Set the view's delegate
         sceneView.delegate = self
@@ -97,67 +95,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         /// will capture it.
         if let touch = touches.first {
             let touchLocation = touch.location(in: sceneView)
-            
             /// This will convert the touch location on the screen into a 3D point in the real world.
             /// The hitTest will return an array of SCNHitTestResult objects.
+            ///
             /// The .existingPlaneUsingExtent that is already in the scene becasue we put it on in the
             /// delegate method func renderer(...
-            let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
-            
-            if let hitResult = results.first {
-                //print("hitResult: \(hitResult)")
-                
-                /// Create a new scene
-                let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
-                if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
-                    diceNode.scale = SCNVector3(3.0, 3.0, 3.0)
-                    
-                    diceNode.position = SCNVector3(
-                        x: hitResult.worldTransform.columns.3.x,
-                        y: hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius * 3.0,
-                        z: hitResult.worldTransform.columns.3.z)
-                    
-                    diceArray.append(diceNode)
-                    // Set the scene to the view
-                    sceneView.scene.rootNode.addChildNode(diceNode)
-                    roll(dice: diceNode)
-                }
+            let results = sceneView.raycastQuery(from: <#T##CGPoint#>, allowing: <#T##ARRaycastQuery.Target#>, alignment: <#T##ARRaycastQuery.TargetAlignment#>) hitTest(touchLocation, types: .existingPlaneUsingExtent)
+            if !results.isEmpty {
+                print("Touch location: \(touchLocation)")
+            } else {
+                print("Touched someplace else")
             }
         }
     }
     
-    /// Role all of the dice
-    func rollAll() {
-        if !diceArray.isEmpty {
-            for dice in diceArray {
-                roll(dice: dice)
-            }
-        }
-    }
-    
-    func roll(dice: SCNNode) {
-        /// Create a random result between 1 and 4 that represents the die face in the x
-        let randomX = Float(arc4random_uniform(4) + 1) * (Float.pi/2)
-        let randomZ = Float(arc4random_uniform(4) + 1) * (Float.pi/2)
-        /// Using the Y axis won't change the number.
-        /// TODO Make the die position look more random if the face could change
-        
-        dice.runAction(SCNAction.rotateBy(
-            x: 0,
-            y: CGFloat(randomX * 3),
-            z: CGFloat(randomZ * 3),
-            duration: 0.5))
-    }
-    
-    
-    @IBAction func rollAgain(_ sender: UIBarButtonItem) {
-        rollAll()
-    }
-    
-    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
-        rollAll()
-    }
-
     /// This will search for the Horizontal plane that can be used as an  Anchor of the object to the plane
     /// IRL of the scene.
     func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
